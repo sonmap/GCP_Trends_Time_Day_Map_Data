@@ -1,0 +1,11 @@
+flowchart LR
+    A["Cloud Scheduler<br/>10분마다 실행"] --> B["Cloud Run<br/>Python 수집기"]
+
+    B --> C["Google Places API<br/>장소 기본정보"]
+    B --> D["서울 실시간 인구 API<br/>시간대별 유동인구"]
+
+    B --> E["Cloud Storage<br/>원본 JSON 저장"]
+    B --> F["BigQuery<br/>분석 테이블 저장"]
+
+    F --> G["BigQuery SQL<br/>시간대별 비교"]
+    F --> H["Looker Studio<br/>대시보드"]
