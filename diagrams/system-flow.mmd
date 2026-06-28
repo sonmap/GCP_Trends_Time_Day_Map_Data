@@ -1,0 +1,59 @@
+flowchart TB
+    subgraph EXT["외부 데이터 소스"]
+        GAPI["Google Places API<br/>장소명 / Place ID / 좌표 / 업종 / 평점 / 영업시간"]
+        SEOUL["서울 실시간 도시데이터 API<br/>실시간 인구 / 혼잡도 / 교통 / 날씨"]
+        PUBLIC["공공데이터포털<br/>생활인구 / 관광지 / 행사 / 날씨"]
+        PRIVATE["민간 유동인구 데이터<br/>통신사 / 카드 / 센서 데이터"]
+    end
+
+    subgraph COLLECT["수집 계층"]
+        SCHED["Cloud Scheduler<br/>5분 / 10분 / 1일 주기 실행"]
+        RUN["Cloud Run Collector<br/>Python API 수집 프로그램"]
+        SECRET["Secret Manager<br/>API Key 보관"]
+    end
+
+    subgraph INGEST["수집/적재 계층"]
+        GCS["Cloud Storage<br/>Raw JSON / CSV 원본 보관"]
+        PUBSUB["Pub/Sub<br/>수집 이벤트 큐"]
+        DATAFLOW["Dataflow<br/>정제 / 변환 / 검증"]
+    end
+
+    subgraph BQ["BigQuery 데이터 저장소"]
+        RAW["Raw Dataset<br/>원본 데이터"]
+        STG["Staging Dataset<br/>정제 데이터"]
+        MART["Mart Dataset<br/>분석용 테이블"]
+        GIS["BigQuery GIS<br/>반경 500m / 행정동 / 격자 분석"]
+        BQML["BigQuery ML<br/>혼잡도 예측"]
+    end
+
+    subgraph ANALYTICS["분석/시각화"]
+        SQL["BigQuery SQL<br/>시간대 / 요일 / 장소별 분석"]
+        LOOKER["Looker Studio<br/>지도 / 그래프 / 대시보드"]
+        ALERT["Cloud Monitoring<br/>수집 실패 / 비용 / 오류 알림"]
+    end
+
+    GAPI --> SCHED
+    SEOUL --> SCHED
+    PUBLIC --> SCHED
+    PRIVATE --> SCHED
+
+    SCHED --> RUN
+    SECRET --> RUN
+
+    RUN --> GCS
+    RUN --> PUBSUB
+    PUBSUB --> DATAFLOW
+    DATAFLOW --> RAW
+    GCS --> RAW
+
+    RAW --> STG
+    STG --> MART
+    MART --> GIS
+    MART --> BQML
+
+    GIS --> SQL
+    BQML --> SQL
+    SQL --> LOOKER
+    RUN --> ALERT
+    DATAFLOW --> ALERT
+    BQ --> ALERT
