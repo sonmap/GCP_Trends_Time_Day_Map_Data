@@ -1,0 +1,17 @@
+flowchart LR
+    A["location_raw.seoul_realtime_population<br/>서울 실시간 원본 JSON"]
+    B["location_raw.google_places_raw<br/>Google Places 원본 JSON"]
+    C["location_stg.stg_population_hourly<br/>시간대별 정제"]
+    D["location_stg.stg_place<br/>장소 정제"]
+    E["location_mart.dim_place<br/>장소 마스터"]
+    F["location_mart.fact_population_hourly<br/>지역별 시간대 인구"]
+    G["location_mart.fact_place_popularity_hourly<br/>장소별 혼잡도 지수"]
+    H["Looker Studio Dashboard"]
+
+    A --> C
+    B --> D
+    D --> E
+    C --> F
+    E --> G
+    F --> G
+    G --> H
